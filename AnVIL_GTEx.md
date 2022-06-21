@@ -12,7 +12,8 @@ Authentication is linked to your Terra-linked Google account, with details to ga
 All data is Open Access, sourced from the [GTEx Portal](https://gtexportal.org/home/datasets). We are using the GTEx Analysis V8 set.
 
 ### FHIR Datastore
-API Requests can be made against the FHIR Base URL: https://healthcare.googleapis.com/v1/projects/ncpi-fhir-cat-2022/locations/us-central1/datasets/GTEx_Open_Access/fhirStores/gtex_v8/fhir 
+API Requests can be made against the FHIR Base URL: https://healthcare.googleapis.com/v1/projects/ncpi-fhir-cat-2022/locations/us-central1/datasets/GTEx_Open_Access/fhirStores/gtex_v8/fhir/ 
+
 The web cloud console interface, which allows some viewing of resources, can be found here: https://console.cloud.google.com/healthcare/fhirviewer/us-central1/GTEx_Open_Access/fhirStores/gtex_v8/browse?authuser=0&project=ncpi-fhir-cat-2022 
 
 Note that some project configured commands, eg `gcloud healthcare fhir-stores list`, won't work unless you specify another project as the Terra workspace project does not have the healthcare API enabled. You can use the `ncpi-fhir-cat-2022` project, eg with the `--project` flag, to perform queries in these cases.
@@ -21,7 +22,8 @@ Note that some project configured commands, eg `gcloud healthcare fhir-stores li
 Participants in this Code-a-thon will have access [provided to this workspace](https://anvil.terra.bio/#workspaces/ncpi-fhir-2022/NCPI%20FHIR%20CAT%202022-%20GTeX%20Public%20Data). The workspace bucket contains the Gene TPM data.
 
 #### GCS Bucket
-The cloud storage uri is: gs://fc-a2df0708-c407-468e-a93f-00a42640ee56
+The cloud storage uri is: `gs://fc-a2df0708-c407-468e-a93f-00a42640ee56`
+
 The web cloud console interface, which allows some browsing, can be found here: https://console.cloud.google.com/storage/browser/fc-a2df0708-c407-468e-a93f-00a42640ee56;tab=objects?authuser=0&prefix=&forceOnObjectsSortingFiltering=false
 
 ## Access
@@ -35,10 +37,11 @@ Terra creates pet service accounts for each user that are given permissions to t
 
 When using the provided workspace images in Terra, one is able to easily generate a Bearer token for use in API calls:
 `gcloud auth print-access-token`
+
 Note that you can also use `gcloud auth list` and then specify the service account instead of relying on the default behavior.
 
-[Details on `list`](https://cloud.google.com/sdk/gcloud/reference/auth/list)
-[Details on `print-access-token`](https://cloud.google.com/sdk/gcloud/reference/auth/print-access-token)
+- [Details on `list`](https://cloud.google.com/sdk/gcloud/reference/auth/list)
+- [Details on `print-access-token`](https://cloud.google.com/sdk/gcloud/reference/auth/print-access-token)
 
 ### User Account OAuth
 You can use a standard OAuth flow to generate a Bearer token that can be sent with your requests. 

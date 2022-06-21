@@ -7,7 +7,7 @@ A research user wants to use PCA to compare tissue-specific gene expression data
 Details on KF data access is here.
 
 ### AnVIL
-Details for GTeX on AnVIL data access is here.
+Details for GTeX on AnVIL data access are [here](https://github.com/NIH-NCPI/FHIR-CAT-June22/blob/main/AnVIL_GTEx.md).
 
 ### INCLUDE DCC
 Details for INCLUDE data access is here.
