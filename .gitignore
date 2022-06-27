@@ -1,2 +1,5 @@
 include_cookie
 kf_cookie
+
+# Mac OS X
+.DS_Store
