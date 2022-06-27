@@ -35,6 +35,8 @@ To access the FHIR services via programmtic requests, eg using `curl`, you will 
 - For Firefox, they can be found in the [Storage Inspector](https://firefox-source-docs.mozilla.org/devtools-user/storage_inspector/index.html).
 4. Find `AWSELBAuthSessionCookie-0`, and copy the ENTIRE value. 
 5. Configure your tool to use this cookie.
-- The "key" is `AWSELBAuthSessionCookie-0` and the "value" is what you recorded previously.
-- For `curl`, you can use `curl --cookie "AWSELBAuthSessionCookie-0=<your cookie here>"
+- The cookie's "key" is `AWSELBAuthSessionCookie-0` and the cookie's "value" is what you recorded previously.
+- If your HTTP tool has a cookie specific option, you can add this key-value pair to the cookie list. EG:
+- For `curl`, you can use `curl --cookie "AWSELBAuthSessionCookie-0=<your cookie here>"`
+- If your HTTP tool does not have a cookie specific option, you'll need to add it to the headers, a la `header = { "Cookie": "AWSELBAuthSessionCookie-0=<the value you copied>" }`
 - This is demonstrated in the [configuration](config/include.sh) and [test](tests/include_test.sh) bash scripts.
