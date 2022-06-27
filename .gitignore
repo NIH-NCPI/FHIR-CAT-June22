@@ -1,5 +1,7 @@
 include_cookie
 kf_cookie
 
+.ipynb_checkpoints
+
 # Mac OS X
 .DS_Store
