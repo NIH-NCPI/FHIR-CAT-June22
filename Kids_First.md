@@ -30,7 +30,7 @@ To access the FHIR services via programmtic requests, eg using `curl`, you will 
 1. Visit the [FHIR Service](https://kf-api-fhir-service.kidsfirstdrc.org/) in your browser.
 2. Login, if you have not already.
 3. Using browser-specific tools, view cookies. 
-- For Chrome, you can visit this [settings URI](chrome://settings/cookies/detail?site=kf-api-fhir-service.kidsfirstdrc.org) to view the specific cookies for the INCLUDE FHIR Service.
+- For Chrome, you can visit this settings URI: chrome://settings/cookies/detail?site=kf-api-fhir-service.kidsfirstdrc.org to view the specific cookies for the Kids First FHIR Service.
 - While at the FHIR Service URL, you can also use the Chrome developer tools -> Application -> Storage -> Cookies.
 - For Firefox, they can be found in the [Storage Inspector](https://firefox-source-docs.mozilla.org/devtools-user/storage_inspector/index.html).
 4. Find `AWSELBAuthSessionCookie-0`, and copy the ENTIRE value. 
