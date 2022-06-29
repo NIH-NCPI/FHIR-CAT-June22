@@ -12,20 +12,106 @@ import csv
 import sys
 from argparse import ArgumentParser, FileType
 
+from collections import defaultdict
+
 import pdb
 
+class Patient:
+    # client => {id => Patient }
+    _cache = defaultdict(dict)
+
+    def __init__(self, client, resource):
+        self.id = resource['id']
+        self.client = client
+        self.identifier = resource['identifier'][0]['value']
+        self.sex = resource['gender']
+        self.resource = resource
+
+    @classmethod
+    def get_resource(cls, client, ref):
+        id = ref.split("/")[-1]
+        if id in Patient._cache[client]:
+            return Patient._cache[client][id]
+        else:
+            response = client.get(ref)
+            if response.success():
+                assert(len(response.entries) == 1)
+
+                resource = response.entries[0]
+                Patient._cache[client][id] = Patient(client, resource)
+
+class Specimen:
+    # client => {id => Specimen }
+    _cache = defaultdict(dict)
+
+    def __init__(self, client, resource):
+        self.id = resource['id']
+        self.client = client
+        self.identifier = resource['identifier'][0]['value']
+        self.resource = resource
+
+    @classmethod
+    def get_resource(cls, client, ref):
+        id = ref.split("/")[-1]
+        if id in Specimen._cache[client]:
+            return Specimen._cache[client][id]
+        else:
+            response = client.get(ref)
+            if response.success():
+                assert(len(response.entries) == 1)
+
+                resource = response.entries[0]
+                Specimen._cache[client][id] = Specimen(client, resource)
+
 class FhirDoc:
-    def __init__(self, resource, title, url):
+    def __init__(self, fhir_endpoint, resource, title, url):
         self.title = title
         self.url = url
+        self.id = resource['id']
         self.subject = None
+        self.endpoint = fhir_endpoint
         self.subject_ref = resource['subject']['reference']
         self.specimen_ref = []
         self.study_tag = resource['meta']['tag'][0]['code']
         self.sex = ""
+        self.study_ref = ""
+        self.study_title = ""
+        self.study_id = ""
         
         if 'context' in resource:
             self.specimen_ref = self.get_specimen_ref(resource.get("context"))
+
+    def get_study_details(self, client):
+        response = client.get("ResearchStudy?identifier={self.study_tag}")
+        if response.success():
+            resource = response.entries[0]['resource']
+            self.study_title = resource['title']
+            self.study_id = resource['id']
+
+            self.study_ref = f"ResearchStudy/{self.study_id}"
+
+    @property
+    def document_reference_full_url(self):
+        return f"{self.endpoint}/DocumentReference/{self.id}"
+
+    @property
+    def patient_reference_full_url(self):
+        return f"{self.endpoint}/{self.subject_ref}"
+
+    @property
+    def study_reference_full_url(self):
+        return f"{self.endpoint}/{self.study_ref}"
+    
+    @property
+    def specimen_reference_full_url(self):
+        specimens = []
+        for specref in self.specimen_ref:
+            specimens.append(f"{self.endpoint}/{specref}")
+
+        if len(specimens) > 1:
+            print(f"We found {len(specimens)} specimens for this one")
+        return ":".join(specimens)
+        
 
     def get_specimen_ref(self, context):
         specimen = []
@@ -38,7 +124,9 @@ class FhirDoc:
         response = client.get(ref)
         if response.success():
             if 'parent' in response.entries[0]:
-                return self.get_tissue_display(client, response.entries[0]['parent']['reference'])
+                #pdb.set_trace()
+                # Is it safe to assume only one parent? For now, yes, but later that may not be true
+                return self.get_tissue_display(client, response.entries[0]['parent'][0]['reference'])
             else:
                 return response.entries[0]['type']['coding'][0]['display']
 
@@ -49,8 +137,6 @@ class FhirDoc:
             tissues.add(self.get_tissue_display(client, specref))
 
         self.tissue_list = ", ".join(sorted(list(tissues)))
-
-
 
     def get_patient(self, client):
         response = client.get(self.subject_ref)
@@ -72,23 +158,40 @@ class FhirDoc:
     @classmethod
     def print_header(self, writer):
         writer.writerow([
-            "filename",
-            "url",
-            "tissue_type",
-            "condition-disease",
+            "document_reference_attachment_uri",
+            "drs_uri",
+            "document_reference_reference",
+            "file_path",
+            "specimen_bodySite",
+            "condition_code",
+            "research_study_reference",
+            "patient_reference",
+            "specimen_reference",
             "study_name",
-            "patient_sex"
+            "filename",
+            "study_id",
+            "patient_sex",
+            "disease_status"
         ])
 
     def write_row(self, writer):
+        drs_id = ""
+        if self.url.split(":")[0] == "drs":
+            drs_id = self.url
         writer.writerow([
-            tag,
-            self.title,
             self.url,
+            drs_id,
+            self.docref_url,
+            "",
             self.tissue_list,
             "TBD",
+            self.study_url,
+            self.specimen_url,
+            self.study_name,
             self.study_tag,
-            self.sex
+            self.sex,
+            self.disease_status,
+            "TBD"
         ])
 
 host_config = load_hosts_file("fhir_hosts")
@@ -113,7 +216,7 @@ args = parser.parse_args(sys.argv[1:])
 
 study_tags = {
     "fhir-cat": ["GTEx"],
-    "qa-kf-inc": ["HTP", "DS-COG-ALL", "DS-PCGC", "DS360-CHD"],
+    "prod-kf-inc": ["HTP", "DS-COG-ALL", "DS-PCGC", "DS360-CHD"],
     "kf-fhir": [        
         "SD_ZXJFFMEF",
         "SD_46SK55A3",
@@ -182,7 +285,7 @@ with open(output_filename, 'wt') as outf:
                     url = attachment['url']
 
                     if valid_filetype(title):
-                        doc = FhirDoc(resource, title, url)
+                        doc = FhirDoc(fhir_client.target_service_url, resource, title, url)
                         docrefs.append(doc)
 
             #pdb.set_trace()
